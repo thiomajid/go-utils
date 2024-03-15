@@ -1,4 +1,4 @@
-// Defines a set of functions that can be applied on slices
+// Defines a set of common functions that can be applied on slices
 
 package itertools
 
