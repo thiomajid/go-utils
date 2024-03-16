@@ -2,6 +2,10 @@
 
 package itertools
 
+import (
+	"fmt"
+)
+
 // Counts how many times elt appears in the slice
 func Count[T comparable](iterable []T, elt T) int {
 	occurence := 0
@@ -36,14 +40,10 @@ func Any[T any](iterable []T, predicate func(T) bool) bool {
 	return false
 }
 
-/*
- ELEMENT-WISE OPERATIONS
-*/
-
 // Selects all elements held in the slice satisfying the predicate until at least one
 // of them doesn't satisfy the predicate.
 func TakeWhile[T any](iterable []T, predicate func(T) bool) []T {
-	result := make([]T, 1)
+	result := make([]T, 0)
 	for _, element := range iterable {
 		if predicate(element) {
 			result = append(result, element)
@@ -58,16 +58,14 @@ func TakeWhile[T any](iterable []T, predicate func(T) bool) []T {
 // Skips all elements held in the slice satisfying the predicate reaching at least one of them
 // which satisfies it. The function will return a new slice going from this found item till the
 // end of the original slice.
-func DropWhile[T any](iterable []T, predicate func(T) bool) []T {
-	result := make([]T, 1)
+func SkipWhile[T any](iterable []T, predicate func(T) bool) []T {
 	for i := 0; i < len(iterable); i++ {
-		if predicate(iterable[i]) {
-			result = append(result, iterable[i+1:]...)
-			break
+		if !predicate(iterable[i]) {
+			return iterable[i:]
 		}
 	}
 
-	return result
+	return []T{}
 }
 
 // Calls the given function for each element within the slice
@@ -81,8 +79,8 @@ func ForEach[T any](iterable []T, fn func(T)) {
 // transformation function.
 func Map[TIn any, TOut any](iterable []TIn, transformFn func(TIn) TOut) []TOut {
 	result := make([]TOut, len(iterable))
-	for _, element := range iterable {
-		result = append(result, transformFn(element))
+	for idx := 0; idx < len(iterable); idx++ {
+		result[idx] = transformFn(iterable[idx])
 	}
 
 	return result
@@ -90,7 +88,7 @@ func Map[TIn any, TOut any](iterable []TIn, transformFn func(TIn) TOut) []TOut {
 
 // Removes from the slice elements that don't satisfy the predicate
 func Filter[T any](iterable []T, predicate func(T) bool) []T {
-	result := make([]T, len(iterable))
+	result := make([]T, 0)
 	for _, element := range iterable {
 		ok := predicate(element)
 		if ok {
@@ -109,7 +107,7 @@ func Flatten[T any](iterable [][]T) []T {
 		nElements += len(nestedIterable)
 	}
 
-	flattened := make([]T, nElements)
+	flattened := make([]T, 0)
 	for _, nestedIterable := range iterable {
 		flattened = append(flattened, nestedIterable...)
 	}
@@ -118,11 +116,19 @@ func Flatten[T any](iterable [][]T) []T {
 }
 
 // Divides a slice into groups of at most `size` elements and returns a slice of slices.
-func Chunk[T any](iterable []T, size int) *ChunkResult[T] {
-	nBatches := (len(iterable) + size - 1) / size
-	remainder := len(iterable) % size
+func Chunk[T any](iterable []T, size int) (*ChunkResult[T], error) {
+	if size < 0 {
+		return nil, fmt.Errorf("%d is not a valid chunk size", size)
+	}
 
+	itemCount := len(iterable)
+
+	// rounds the result to the next whole number supposing that itemCount is not
+	// always a factor of size.
+	nBatches := (itemCount + size - 1) / size
+	remainder := len(iterable) % size
 	result := make([][]T, nBatches)
+
 	for i := 0; i < nBatches; i++ {
 		start := i * size
 		end := start + size
@@ -137,7 +143,7 @@ func Chunk[T any](iterable []T, size int) *ChunkResult[T] {
 		ChunkSize: size,
 		Total:     len(iterable),
 		Remainder: remainder,
-	}
+	}, nil
 }
 
 // func GroupBy[TKey comparable, TValue any](iterable []TValue, keyFn func(TValue) TKey) map[TKey][]TValue {
