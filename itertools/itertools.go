@@ -61,7 +61,8 @@ func TakeWhile[T any](iterable []T, predicate func(T) bool) []T {
 func SkipWhile[T any](iterable []T, predicate func(T) bool) []T {
 	for i := 0; i < len(iterable); i++ {
 		if !predicate(iterable[i]) {
-			return iterable[i:]
+			result := make([]T, 0, len(iterable[i:]))
+			return append(result, iterable[i:]...)
 		}
 	}
 
@@ -107,7 +108,7 @@ func Flatten[T any](iterable [][]T) []T {
 		nElements += len(nestedIterable)
 	}
 
-	flattened := make([]T, 0)
+	flattened := make([]T, 0, nElements)
 	for _, nestedIterable := range iterable {
 		flattened = append(flattened, nestedIterable...)
 	}
