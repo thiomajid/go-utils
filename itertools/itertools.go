@@ -117,7 +117,7 @@ func Flatten[T any](iterable [][]T) []T {
 
 // Divides a slice into groups of at most `size` elements and returns a slice of slices.
 func Chunk[T any](iterable []T, size int) (*ChunkResult[T], error) {
-	if size < 0 {
+	if size <= 0 {
 		return nil, fmt.Errorf("%d is not a valid chunk size", size)
 	}
 
