@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// Counts how many times elt appears in the slice
+// Counts how many occurences of a given element are contained within a slice
 func Count[T comparable](iterable []T, elt T) int {
 	occurence := 0
 	for _, item := range iterable {
@@ -79,8 +79,12 @@ func ForEach[T any](iterable []T, fn func(T)) {
 // Transforms each element within the provide iterable into TOut elements by applying the provided
 // transformation function.
 func Map[TIn any, TOut any](iterable []TIn, transformFn func(TIn) TOut) []TOut {
-	result := make([]TOut, len(iterable))
-	for idx := 0; idx < len(iterable); idx++ {
+	total := len(iterable)
+
+	// ignore static check warning
+	result := make([]TOut, total, total)
+
+	for idx := 0; idx < total; idx++ {
 		result[idx] = transformFn(iterable[idx])
 	}
 
