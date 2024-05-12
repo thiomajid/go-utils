@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// Counts how many times elt appears in the slice
+// Counts how many occurences of a given element are contained within a slice
 func Count[T comparable](iterable []T, elt T) int {
 	occurence := 0
 	for _, item := range iterable {
@@ -79,9 +79,9 @@ func ForEach[T any](iterable []T, fn func(T)) {
 // Transforms each element within the provide iterable into TOut elements by applying the provided
 // transformation function.
 func Map[TIn any, TOut any](iterable []TIn, transformFn func(TIn) TOut) []TOut {
-	result := make([]TOut, len(iterable))
-	for idx := 0; idx < len(iterable); idx++ {
-		result[idx] = transformFn(iterable[idx])
+	result := make([]TOut, 0, len(iterable))
+	for _, element := range iterable {
+		result = append(result, transformFn(element))
 	}
 
 	return result
@@ -119,7 +119,7 @@ func Flatten[T any](iterable [][]T) []T {
 // Divides a slice into groups of at most `size` elements and returns a slice of slices.
 func Chunk[T any](iterable []T, size int) (*ChunkResult[T], error) {
 	if size <= 0 {
-		return nil, fmt.Errorf("%d is not a valid chunk size", size)
+		return nil, fmt.Errorf("%d is not a valid chunk size, you must provide a positive integer", size)
 	}
 
 	itemCount := len(iterable)
@@ -147,16 +147,17 @@ func Chunk[T any](iterable []T, size int) (*ChunkResult[T], error) {
 	}, nil
 }
 
-// func GroupBy[TKey comparable, TValue any](iterable []TValue, keyFn func(TValue) TKey) map[TKey][]TValue {
-// 	result := make(map[TKey][]TValue)
-// 	for _, element := range iterable {
-// 		key := keyFn(element)
-// 		group, ok := result[key]
-// 		if !ok {
-// 			group = make([]TValue, 0)
-// 			result[key] = group
-// 		}
-// 		group = append(group, element)
-// 	}
-// 	return result
-// }
+func GroupBy[TKey comparable, TValue any](iterable []TValue, keyFn func(TValue) TKey) map[TKey][]TValue {
+	result := make(map[TKey][]TValue)
+
+	for _, element := range iterable {
+		key := keyFn(element)
+
+		if _, ok := result[key]; !ok {
+			result[key] = make([]TValue, 0, 1)
+		}
+		result[key] = append(result[key], element)
+	}
+
+	return result
+}
