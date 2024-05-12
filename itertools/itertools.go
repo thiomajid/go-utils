@@ -119,7 +119,7 @@ func Flatten[T any](iterable [][]T) []T {
 // Divides a slice into groups of at most `size` elements and returns a slice of slices.
 func Chunk[T any](iterable []T, size int) (*ChunkResult[T], error) {
 	if size <= 0 {
-		return nil, fmt.Errorf("%d is not a valid chunk size", size)
+		return nil, fmt.Errorf("%d is not a valid chunk size, you must provide a positive integer", size)
 	}
 
 	itemCount := len(iterable)
@@ -147,16 +147,17 @@ func Chunk[T any](iterable []T, size int) (*ChunkResult[T], error) {
 	}, nil
 }
 
-// func GroupBy[TKey comparable, TValue any](iterable []TValue, keyFn func(TValue) TKey) map[TKey][]TValue {
-// 	result := make(map[TKey][]TValue)
-// 	for _, element := range iterable {
-// 		key := keyFn(element)
-// 		group, ok := result[key]
-// 		if !ok {
-// 			group = make([]TValue, 0)
-// 			result[key] = group
-// 		}
-// 		group = append(group, element)
-// 	}
-// 	return result
-// }
+func GroupBy[TKey comparable, TValue any](iterable []TValue, keyFn func(TValue) TKey) map[TKey][]TValue {
+	result := make(map[TKey][]TValue)
+
+	for _, element := range iterable {
+		key := keyFn(element)
+
+		if _, ok := result[key]; !ok {
+			result[key] = make([]TValue, 0, 1)
+		}
+		result[key] = append(result[key], element)
+	}
+
+	return result
+}

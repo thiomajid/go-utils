@@ -1,6 +1,7 @@
 package itertools
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -189,4 +190,23 @@ func TestChunkToProduceTwoBatches(t *testing.T) {
 		}
 	}
 
+}
+
+func TestGroupByWithStringOfVaryingLength(t *testing.T) {
+	input := []string{"a", "aa", "b", "bbb"}
+	expected := map[int][]string{
+		1: {"a", "b"},
+		2: {"aa"},
+		3: {"bbb"},
+	}
+
+	keyFn := func(s string) int {
+		return len(s)
+	}
+
+	output := GroupBy(input, keyFn)
+
+	if !reflect.DeepEqual(expected, output) {
+		t.Errorf("An incorrect map has been produced")
+	}
 }
